@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -26,6 +27,7 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import icc.personal.jetpack.layouts.ui.theme.JetpackLayoutsTheme
@@ -447,4 +449,98 @@ fun StaggeredScreen() {
 @Composable
 fun StaggeredScreenPreview() {
     StaggeredScreen()
+}
+
+/**
+ * Constraint Layout
+ */
+
+@ExperimentalComposeUiApi
+@Composable
+fun ConstraintLayoutContent(modifier: Modifier = Modifier) {
+    ConstraintLayout(
+        modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+    ) {
+        val guideline = createGuidelineFromStart(0.5f)
+        // Create references for the composables to constrain
+        val (
+            button, text, button2,
+            button3, divider
+        ) = createRefs()
+        Button(
+            onClick = { /*TODO*/ },
+                      /** Assign reference "button" to the Button  */
+            modifier = Modifier.constrainAs(button) {
+                /**
+                 * Link button top to parent top and add a margin of 16dp
+                 * ----------------------------------- PARENT TOP
+                 * ^
+                 * |
+                 * | 16dp
+                 * |
+                 * |
+                 * ---------- BUTTON TOP
+                 * | Click  |
+                 * ----------
+                 */
+                top.linkTo(parent.top, margin = 16.dp)
+                centerHorizontallyTo(parent)
+            }
+        ) {
+            Text("Click")
+        }
+        Text("Text", Modifier.constrainAs(text) {
+            top.linkTo(button.bottom, margin = 16.dp)
+            centerAround(button.end)
+        })
+
+        val barrier = createEndBarrier(text)
+        Button(
+            onClick = { /* Do something */ },
+            modifier = Modifier.constrainAs(button2) {
+                top.linkTo(parent.top, margin = 16.dp)
+                start.linkTo(barrier)
+            }
+        ) {
+            Text("Button 2")
+        }
+
+        Button(
+            onClick = { /*TODO*/ },
+            modifier = Modifier.constrainAs(button3) {
+                top.linkTo(text.bottom, margin = 16.dp)
+                start.linkTo(guideline, margin = 16.dp)
+            }
+        ) {
+            Text("Button 3")
+        }
+
+        Divider(
+            color = MaterialTheme.colors.primary,
+            //thickness = 1.dp,
+            modifier = Modifier
+                .constrainAs(divider) {
+                    centerHorizontallyTo(parent)
+                }
+                .fillMaxHeight()
+                .width(1.dp)
+        )
+
+    }
+}
+
+@ExperimentalComposeUiApi
+@Preview(showBackground = true)
+@Composable
+fun ConstraintLayoutContentPreview() {
+    JetpackLayoutsTheme {
+        Scaffold { innerPadding ->
+            ConstraintLayoutContent(
+                Modifier
+                    .padding(innerPadding)
+                    .padding(all = 8.dp))
+        }
+    }
 }
